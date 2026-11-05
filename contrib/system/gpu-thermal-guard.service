@@ -1,0 +1,12 @@
+[Unit]
+Description=GPU overheat guard (fan control by junction temperature)
+After=gpu-tune.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/gpu-thermal-guard.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

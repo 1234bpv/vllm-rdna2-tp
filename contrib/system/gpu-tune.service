@@ -1,0 +1,17 @@
+[Unit]
+Description=Undervolt and clock limit for both Navi 21 GPUs
+# ⚠️ Do NOT combine After=multi-user.target with WantedBy=multi-user.target here: the unit
+# wants to be part of the target and at the same time to start after it. systemd sees a cycle
+# (target -> guard -> gpu-tune -> target) and breaks it by dropping the gpu-thermal-guard job,
+# so the thermal guard silently did not start at any boot. Found on 2026-08-19, after a hang
+# at idle. Readiness of sysfs is ensured by the wait in ExecStartPre, not by the ordering.
+After=basic.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=/bin/bash -c 'for i in $(seq 60); do compgen -G "/sys/class/drm/card*/device/pp_od_clk_voltage" >/dev/null && exit 0; sleep 1; done; echo "amdgpu sysfs did not appear within 60 s" >&2; exit 1'
+ExecStart=/usr/local/sbin/gpu-tune.sh
+
+[Install]
+WantedBy=multi-user.target

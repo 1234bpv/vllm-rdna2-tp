@@ -1,0 +1,18 @@
+vLLM on RDNA2
+Copyright 2026 Pavlo Biletskyi
+
+This product is a derivative work of vLLM:
+  https://github.com/vllm-project/vllm
+  commit c296851a7d173fa89d2eefbca0243be42ae9b5e0
+  Copyright the vLLM contributors
+  Licensed under the Apache License, Version 2.0
+
+patches/vllm-rdna2-tp-0.1.0.patch modifies that source. The changed and added files
+are listed in patches/MODIFIED_FILES.txt. The installer downloads the upstream source
+and applies the patch; the source of vLLM itself is not part of this repository,
+except for the patch and the new files copied to src/ for reading.
+
+The model weights named in presets/ are not part of this repository. Each model has
+its own license on its Hugging Face page.
+
+The project is not affiliated with AMD or with the vLLM project.

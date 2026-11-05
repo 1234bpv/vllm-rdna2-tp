@@ -1,0 +1,1510 @@
+{
+  "_comment": "Each run selects records of kv-concurrency.jsonl by stage name. Tables are generated from these records by make_tables.py.",
+  "machine": {
+    "cards": "RX 6800 (60 CU, PCI 04:00.0) + RX 6800 XT (72 CU), 16 GiB each, no P2P",
+    "third_card": "RX 6800 on a chipset PCIe 2.0 x1 slot, used only in the 3-card comparison runs",
+    "cpu": "2x Xeon E5-2699 v3",
+    "ram": "128 GiB DDR4-2133",
+    "clock": "SCLK limited to 1600 MHz",
+    "os": "Kubuntu 24.04, kernel 6.8, in-kernel amdgpu",
+    "rocm": "7.2.4",
+    "torch": "2.13.0+rocm7.2",
+    "python": "3.12",
+    "upstream": "vLLM c296851a7d (2026-08-18)",
+    "llamacpp": "058df67 (2026-08-17)"
+  },
+  "runs": [
+    {
+      "id": "q27",
+      "match": [
+        {
+          "stage": "night-m3-27-s0"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "weights": "W4A16 AWQ g128, 14.5 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": 665760,
+      "kv_capacity_source": "219 blocks x 3040 tokens, server log",
+      "tree": "9243d6330b",
+      "date": "2026-10-01",
+      "flags": "VLLM_ROCM_W4A8=256 VLLM_ROCM_W4A8_TILE=8 VLLM_ROCM_LMHEAD_INT8=1 VLLM_ROCM_EMBED_UVA=1 VLLM_ROCM_INT4_DECODE_QLEN_MAX=1"
+    },
+    {
+      "id": "q27-mtp",
+      "match": [
+        {
+          "stage": "night-m3-27-s2cg"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "weights": "W4A16 AWQ g128, 14.5 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": true,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": 506432,
+      "kv_capacity_source": "164 blocks x 3088 tokens, server log",
+      "tree": "9243d6330b",
+      "date": "2026-10-01",
+      "flags": "as q27, VLLM_ROCM_INT4_DECODE_QLEN_MAX=3, MTP 2 drafts, capture sizes up to 48"
+    },
+    {
+      "id": "q9",
+      "match": [
+        {
+          "stage": "night-n1-9b-spec0"
+        }
+      ],
+      "model": "Qwen3.5-9B",
+      "checkpoint": "atalsharma/Qwen3.5-9B-AWQ",
+      "weights": "W4A16 AWQ g128, 7.14 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": 2689024,
+      "kv_capacity_source": "1313 blocks x 2048 tokens, server log",
+      "tree": "e7e3cfe81a",
+      "date": "2026-09-29",
+      "flags": "as q27",
+      "alt_points": {
+        "32768": 8192
+      }
+    },
+    {
+      "id": "q9-mtp",
+      "match": [
+        {
+          "stage": "night-n1-9b-spec2"
+        }
+      ],
+      "model": "Qwen3.5-9B",
+      "checkpoint": "atalsharma/Qwen3.5-9B-AWQ + MTP head from Qwen/Qwen3.5-9B",
+      "weights": "W4A16 AWQ g128, 7.14 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": true,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": 2148624,
+      "kv_capacity_source": "1041 blocks x 2064 tokens, server log",
+      "tree": "e7e3cfe81a",
+      "date": "2026-09-29",
+      "flags": "as q27-mtp",
+      "alt_points": {
+        "32768": 8192
+      }
+    },
+    {
+      "id": "q35",
+      "match": [
+        {
+          "stage": "moe-35b-m3-35-s0"
+        }
+      ],
+      "model": "Qwen3.5-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.5-35B-A3B-AWQ-4bit",
+      "weights": "MoE W4A16 AWQ",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 4,
+      "kv_capacity": 460432,
+      "kv_capacity_source": "GPU KV cache size, server log",
+      "tree": "31f4535161",
+      "date": "2026-10-01",
+      "flags": "VLLM_ROCM_MOE_RDNA2=1; measured before the HIP prefill kernel was added",
+      "note": "Prefill on the release tree should be higher: this run predates the HIP prefill kernel."
+    },
+    {
+      "id": "q35-offload",
+      "match": [
+        {
+          "stage": "moe-35b-m5-s0"
+        }
+      ],
+      "model": "Qwen3.5-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.5-35B-A3B-AWQ-4bit",
+      "weights": "MoE W4A16 AWQ",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 4,
+      "kv_capacity": 742741,
+      "kv_capacity_source": "GPU KV cache size, server log",
+      "tree": "31f4535161",
+      "date": "2026-10-01",
+      "flags": "as q35, KV offload to RAM 32 GiB"
+    },
+    {
+      "id": "q35-mtp",
+      "match": [
+        {
+          "stage": "moe-35b-m3-35-s2cg"
+        }
+      ],
+      "model": "Qwen3.5-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.5-35B-A3B-AWQ-4bit",
+      "weights": "MoE W4A16 AWQ",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": true,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 4,
+      "kv_capacity": 327680,
+      "kv_capacity_source": "GPU KV cache size, server log",
+      "tree": "31f4535161",
+      "date": "2026-10-01",
+      "flags": "as q35, MTP 2 drafts, capture sizes up to 48"
+    },
+    {
+      "id": "q36",
+      "match": [
+        {
+          "stage": "moe-35b-q36e0-spec0"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted by scripts/awq-to-ct.py",
+      "weights": "MoE CT-INT4 + W8A16, 24 GB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 4,
+      "kv_capacity": 739380,
+      "kv_capacity_source": "GPU KV cache size, server log",
+      "tree": "2439264a0b",
+      "date": "2026-10-07",
+      "flags": "VLLM_ROCM_MOE_RDNA2=1 VLLM_ROCM_W8A16=1"
+    },
+    {
+      "id": "q36-mtp",
+      "match": [
+        {
+          "stage": "moe-35b-q36e0-spec2"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted by scripts/awq-to-ct.py",
+      "weights": "MoE CT-INT4 + W8A16, 24 GB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": true,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 4,
+      "kv_capacity": 542161,
+      "kv_capacity_source": "GPU KV cache size, server log",
+      "tree": "2439264a0b",
+      "date": "2026-10-06",
+      "flags": "as q36, VLLM_ROCM_INT4_DECODE_QLEN_MAX=3, MTP 2 drafts, capture sizes up to 24"
+    },
+    {
+      "id": "q36-mtp-262k",
+      "match": [
+        {
+          "stage": "moe-35b-q36e1-kv4"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted by scripts/awq-to-ct.py",
+      "weights": "MoE CT-INT4 + W8A16, 24 GB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": true,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 4,
+      "kv_capacity": 634664,
+      "kv_capacity_source": "GPU KV cache size, server log",
+      "tree": "2439264a0b",
+      "date": "2026-10-07",
+      "flags": "as q36-mtp"
+    },
+    {
+      "id": "q36-mtp-262k-kv8",
+      "match": [
+        {
+          "stage": "moe-35b-q36e1-kv8b"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted by scripts/awq-to-ct.py",
+      "weights": "MoE CT-INT4 + W8A16, 24 GB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": true,
+      "window": 262144,
+      "kv": "int8",
+      "util": "0.97",
+      "max_seqs": 4,
+      "kv_capacity": 353324,
+      "kv_capacity_source": "GPU KV cache size, server log",
+      "tree": "2439264a0b",
+      "date": "2026-10-07",
+      "flags": "as q36-mtp, KV int8_per_token_head"
+    },
+    {
+      "id": "gemma",
+      "match": [
+        {
+          "stage": "gemma4-pf-hip"
+        }
+      ],
+      "model": "Gemma 4 26B-A4B",
+      "checkpoint": "cyankiwi/gemma-4-26B-A4B-it-qat-AWQ-INT4",
+      "weights": "MoE AWQ INT4 g32, 17.2 GB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 16,
+      "kv_capacity": 584044,
+      "kv_capacity_source": "GPU KV cache size, server log",
+      "tree": "e6393b86f0",
+      "date": "2026-10-03",
+      "flags": "VLLM_ROCM_MOE_RDNA2=1 VLLM_ROCM_INT4_PREFILL_KERNEL=hip"
+    },
+    {
+      "id": "gemma-streams",
+      "match": [
+        {
+          "stage": "gemma4-cap-tp2"
+        }
+      ],
+      "model": "Gemma 4 26B-A4B",
+      "checkpoint": "cyankiwi/gemma-4-26B-A4B-it-qat-AWQ-INT4",
+      "weights": "MoE AWQ INT4 g32, 17.2 GB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 16,
+      "kv_capacity": 584044,
+      "kv_capacity_source": "GPU KV cache size, server log",
+      "tree": "a8de020c41",
+      "date": "2026-10-03",
+      "flags": "VLLM_ROCM_MOE_RDNA2=1; before the HIP prefill kernel"
+    },
+    {
+      "id": "llama-q36",
+      "match": [
+        {
+          "stage": "q36-llama-spec0"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "checkpoint": "AesSedai Q5_K_M GGUF",
+      "weights": "GGUF Q5_K_M",
+      "engine": "llama.cpp",
+      "cards": 2,
+      "tp": null,
+      "pp": null,
+      "mtp": false,
+      "window": 262144,
+      "kv": "q8",
+      "util": null,
+      "max_seqs": null,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "058df67",
+      "date": "2026-10-07",
+      "flags": "q8 KV cache"
+    },
+    {
+      "id": "llama-q27-3cards",
+      "match": [
+        {
+          "stage": "llamacpp-3karty"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "checkpoint": "unsloth Qwen3.8-27B-Q4_0.gguf",
+      "weights": "GGUF Q4_0, 14.94 GiB",
+      "engine": "llama.cpp",
+      "cards": 3,
+      "tp": null,
+      "pp": null,
+      "mtp": false,
+      "window": 126976,
+      "kv": "q4_0",
+      "util": null,
+      "max_seqs": null,
+      "kv_capacity": 888832,
+      "kv_capacity_source": "7 slots x 126976 tokens, measured capacity",
+      "tree": "058df67",
+      "date": "2026-09-23",
+      "flags": "-sm layer, q4_0 KV (-fa on), -b 2048 -ub 512, pipeline mode, -np N, slot 126976"
+    },
+    {
+      "id": "pp3-q27",
+      "match": [
+        {
+          "stage": "pp3-27b-3karty",
+          "before": "2026-09-24"
+        },
+        {
+          "stage": "pp3-27b-3karty",
+          "contains": "etap=n6"
+        },
+        {
+          "stage": "pp3-27b-3karty",
+          "contains": "etap=n5-guard-v1"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "weights": "W4A16 AWQ g128, 14.5 GiB",
+      "engine": "fork, pipeline parallel 3",
+      "cards": 3,
+      "tp": 1,
+      "pp": 3,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.93-0.97",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "2026-09-23 and 2026-09-29 trees",
+      "date": "2026-09-23, 2026-09-29",
+      "flags": "pipeline parallelism on 3 cards, host transfer between stages"
+    },
+    {
+      "id": "pp3-gemma",
+      "match": [
+        {
+          "stage": "gemma4-cap-pp3"
+        },
+        {
+          "stage": "gemma4-cap-pp3b"
+        }
+      ],
+      "model": "Gemma 4 26B-A4B",
+      "checkpoint": "cyankiwi/gemma-4-26B-A4B-it-qat-AWQ-INT4",
+      "weights": "MoE AWQ INT4 g32, 17.2 GB",
+      "engine": "fork, pipeline parallel 3",
+      "cards": 3,
+      "tp": 1,
+      "pp": 3,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.95-0.97",
+      "max_seqs": 16,
+      "kv_capacity": 1232968,
+      "kv_capacity_source": "GPU KV cache size, server log, cap-pp3b",
+      "tree": "a8de020c41, eb6b697fbd",
+      "date": "2026-10-03, 2026-10-04",
+      "flags": "pipeline parallelism on 3 cards; cap-pp3b uses VLLM_ROCM_MOE_CHUNK from a branch that is not in this release"
+    },
+    {
+      "id": "q9-tp1",
+      "match": [
+        {
+          "stage": "9b-1potik"
+        },
+        {
+          "stage": "9b-kesh-shvydkist"
+        }
+      ],
+      "model": "Qwen3.5-9B",
+      "checkpoint": "atalsharma/Qwen3.5-9B-AWQ",
+      "weights": "W4A16 AWQ g128, 7.14 GiB",
+      "engine": "fork, one card",
+      "cards": 1,
+      "tp": 1,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.95",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": "326 blocks",
+      "tree": "2026-09-19 tree",
+      "date": "2026-09-19",
+      "flags": "TP=1"
+    },
+    {
+      "id": "q9-tp2-0919",
+      "match": [
+        {
+          "stage": "9b-tp2-B-dovhyj"
+        },
+        {
+          "stage": "9b-tp2-4potoky"
+        }
+      ],
+      "model": "Qwen3.5-9B",
+      "checkpoint": "atalsharma/Qwen3.5-9B-AWQ",
+      "weights": "W4A16 AWQ g128, 7.14 GiB",
+      "engine": "fork, two cards",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.95",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": "1240 blocks",
+      "tree": "2026-09-19 tree",
+      "date": "2026-09-19",
+      "flags": "TP=2"
+    },
+    {
+      "id": "q27-attn-triton",
+      "match": [
+        {
+          "stage": "mtp-triton-spec0-2026-09-28-mtp-triton-spec0"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "tree": "e7e3cfe81a",
+      "date": "2026-09-28",
+      "flags": "VLLM_ROCM_INT4_DECODE_KERNEL=triton",
+      "weights": "W4A16 AWQ g128",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 8
+    },
+    {
+      "id": "q27-attn-hip",
+      "match": [
+        {
+          "stage": "mtp-new-spec0-2026-09-28-mtp-new-spec0",
+          "before": "2026-09-28 22:02"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "tree": "e7e3cfe81a",
+      "date": "2026-09-28",
+      "flags": "VLLM_ROCM_INT4_DECODE_KERNEL=new",
+      "weights": "W4A16 AWQ g128",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 8
+    },
+    {
+      "id": "gemma-prefill-triton",
+      "match": [
+        {
+          "stage": "gemma4-pf-triton"
+        }
+      ],
+      "model": "Gemma 4 26B-A4B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.97",
+      "tree": "e6393b86f0",
+      "date": "2026-10-03",
+      "flags": "VLLM_ROCM_INT4_PREFILL_KERNEL=triton",
+      "weights": "MoE AWQ INT4 g32",
+      "checkpoint": "cyankiwi/gemma-4-26B-A4B-it-qat-AWQ-INT4",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 16
+    },
+    {
+      "id": "gemma-rep1",
+      "match": [
+        {
+          "stage": "gemma4-pfr-hip-1"
+        }
+      ],
+      "model": "Gemma 4 26B-A4B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.97",
+      "tree": "a4f81bd754",
+      "date": "2026-10-03",
+      "flags": "repeat 1",
+      "weights": "MoE AWQ INT4 g32",
+      "checkpoint": "cyankiwi/gemma-4-26B-A4B-it-qat-AWQ-INT4",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 16
+    },
+    {
+      "id": "gemma-rep2",
+      "match": [
+        {
+          "stage": "gemma4-pfr-hip-2"
+        }
+      ],
+      "model": "Gemma 4 26B-A4B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.97",
+      "tree": "a4f81bd754",
+      "date": "2026-10-03",
+      "flags": "repeat 2",
+      "weights": "MoE AWQ INT4 g32",
+      "checkpoint": "cyankiwi/gemma-4-26B-A4B-it-qat-AWQ-INT4",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 16
+    },
+    {
+      "id": "q36-w8-on-1",
+      "match": [
+        {
+          "stage": "moe-35b-w8b-on-1"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "tree": "0e075f8681",
+      "date": "2026-10-04",
+      "flags": "VLLM_ROCM_W8A16=1, repeat 1",
+      "weights": "MoE CT-INT4",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 4
+    },
+    {
+      "id": "q36-w8-on-2",
+      "match": [
+        {
+          "stage": "moe-35b-w8b-on-2"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "tree": "0e075f8681",
+      "date": "2026-10-04",
+      "flags": "VLLM_ROCM_W8A16=1, repeat 2",
+      "weights": "MoE CT-INT4",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 4
+    },
+    {
+      "id": "q36-w8-off-1",
+      "match": [
+        {
+          "stage": "moe-35b-w8b-off-1"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "tree": "0e075f8681",
+      "date": "2026-10-04",
+      "flags": "VLLM_ROCM_W8A16=0, repeat 1",
+      "weights": "MoE CT-INT4",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 4
+    },
+    {
+      "id": "q36-w8-off-2",
+      "match": [
+        {
+          "stage": "moe-35b-w8b-off-2-r"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "tree": "0e075f8681",
+      "date": "2026-10-04",
+      "flags": "VLLM_ROCM_W8A16=0, repeat 2",
+      "weights": "MoE CT-INT4",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 4
+    },
+    {
+      "id": "q36-prefill-triton",
+      "match": [
+        {
+          "stage": "moe-35b-q36ab-tri-1"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "tree": "a4f81bd754",
+      "date": "2026-10-03",
+      "flags": "VLLM_ROCM_INT4_PREFILL_KERNEL=triton",
+      "weights": "MoE CT-INT4",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 4
+    },
+    {
+      "id": "q36-prefill-hip",
+      "match": [
+        {
+          "stage": "moe-35b-q36ab-hip-1"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "tree": "a4f81bd754",
+      "date": "2026-10-03",
+      "flags": "VLLM_ROCM_INT4_PREFILL_KERNEL=hip",
+      "weights": "MoE CT-INT4",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 4
+    },
+    {
+      "id": "q27-rep-a",
+      "match": [
+        {
+          "stage": "night-n7b-27b-spec0-skinny"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "tree": "b3658d5a78",
+      "date": "2026-09-29",
+      "flags": "no-MTP control",
+      "weights": "W4A16 AWQ g128",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 8
+    },
+    {
+      "id": "q27-rep-b",
+      "match": [
+        {
+          "stage": "night-m64-s0"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "tree": "9243d6330b",
+      "date": "2026-09-30",
+      "flags": "no-MTP control",
+      "weights": "W4A16 AWQ g128",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "max_seqs": 8
+    },
+    {
+      "id": "rel-q27",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q27 point"
+        }
+      ],
+      "older": "q27",
+      "model": "Qwen3.8-27B",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "weights": "W4A16 AWQ g128, 14.5 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": 580663,
+      "kv_capacity_source": "GPU KV cache size, server log, release check",
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "VLLM_ROCM_W4A8=256 VLLM_ROCM_W4A8_TILE=8 VLLM_ROCM_LMHEAD_INT8=1 VLLM_ROCM_EMBED_UVA=1 VLLM_ROCM_INT4_DECODE_QLEN_MAX=1"
+    },
+    {
+      "id": "rel-q27-mtp",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q27-mtp point"
+        }
+      ],
+      "older": "q27-mtp",
+      "model": "Qwen3.8-27B",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "weights": "W4A16 AWQ g128, 14.5 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": true,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": 378352,
+      "kv_capacity_source": "GPU KV cache size, server log, release check",
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "as q27, VLLM_ROCM_INT4_DECODE_QLEN_MAX=3, MTP 2 drafts, capture sizes up to 48"
+    },
+    {
+      "id": "rel-q9",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q9 point"
+        },
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab-q9-on point=L300x2"
+        },
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab-q9-on point=L8192x4"
+        }
+      ],
+      "older": "q9",
+      "model": "Qwen3.5-9B",
+      "checkpoint": "atalsharma/Qwen3.5-9B-AWQ",
+      "weights": "W4A16 AWQ g128, 7.14 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": 2464936,
+      "kv_capacity_source": "GPU KV cache size, server log, release check",
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "as q27",
+      "alt_points": {
+        "32768": 8192
+      }
+    },
+    {
+      "id": "rel-q9-mtp",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q9-mtp point"
+        },
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q9-mtp-x point"
+        }
+      ],
+      "older": "q9-mtp",
+      "model": "Qwen3.5-9B",
+      "checkpoint": "atalsharma/Qwen3.5-9B-AWQ + MTP head from Qwen/Qwen3.5-9B",
+      "weights": "W4A16 AWQ g128, 7.14 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": true,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": 1904288,
+      "kv_capacity_source": "GPU KV cache size, server log, release check",
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "as q27-mtp",
+      "alt_points": {
+        "32768": 8192
+      }
+    },
+    {
+      "id": "rel-q35",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q35 point"
+        },
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q35-x point"
+        }
+      ],
+      "older": "q35",
+      "model": "Qwen3.5-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.5-35B-A3B-AWQ-4bit",
+      "weights": "MoE W4A16 AWQ",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 4,
+      "kv_capacity": 584782,
+      "kv_capacity_source": "GPU KV cache size, server log, release check",
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "VLLM_ROCM_MOE_RDNA2=1"
+    },
+    {
+      "id": "rel-q35-mtp",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q35-mtp point"
+        },
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q35-mtp-x point=L300x2"
+        },
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q35-mtp-x point=L32768x2"
+        }
+      ],
+      "older": "q35-mtp",
+      "model": "Qwen3.5-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.5-35B-A3B-AWQ-4bit",
+      "weights": "MoE W4A16 AWQ",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": true,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 4,
+      "kv_capacity": 268101,
+      "kv_capacity_source": "GPU KV cache size, server log, release check",
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "as q35, MTP 2 drafts, capture sizes up to 48"
+    },
+    {
+      "id": "rel-q36",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q36 point"
+        },
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab-q36-on point=L32768x2"
+        }
+      ],
+      "older": "q36",
+      "model": "Qwen3.6-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted by scripts/awq-to-ct.py",
+      "weights": "MoE CT-INT4 + W8A16, 24 GB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 8,
+      "kv_capacity": 860370,
+      "kv_capacity_source": "GPU KV cache size, server log, release check",
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "VLLM_ROCM_MOE_RDNA2=1 VLLM_ROCM_W8A16=1"
+    },
+    {
+      "id": "rel-q36-mtp-262k",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q36-mtp-262k point"
+        },
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q36-mtp-262k-r2 point=L32768x2"
+        }
+      ],
+      "older": "q36-mtp-262k",
+      "model": "Qwen3.6-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted by scripts/awq-to-ct.py",
+      "weights": "MoE CT-INT4 + W8A16, 24 GB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": true,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 8,
+      "kv_capacity": 655360,
+      "kv_capacity_source": "GPU KV cache size, server log, release check",
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "as q36-mtp"
+    },
+    {
+      "id": "rel-gemma",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree gemma point"
+        }
+      ],
+      "older": "gemma",
+      "model": "Gemma 4 26B-A4B",
+      "checkpoint": "cyankiwi/gemma-4-26B-A4B-it-qat-AWQ-INT4",
+      "weights": "MoE AWQ INT4 g32, 17.2 GB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 16,
+      "kv_capacity": 933930,
+      "kv_capacity_source": "GPU KV cache size, server log, release check",
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "VLLM_ROCM_MOE_RDNA2=1 VLLM_ROCM_INT4_PREFILL_KERNEL=hip"
+    },
+    {
+      "id": "rel-llama-q36",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree llama-q36 point"
+        },
+        {
+          "stage": "release-tree",
+          "contains": "release-tree llama-q36-x point"
+        }
+      ],
+      "older": "llama-q36",
+      "model": "Qwen3.6-35B-A3B",
+      "checkpoint": "AesSedai Q5_K_M GGUF",
+      "weights": "GGUF Q5_K_M",
+      "engine": "llama.cpp",
+      "cards": 2,
+      "tp": null,
+      "pp": null,
+      "mtp": false,
+      "window": 262144,
+      "kv": "q8",
+      "util": null,
+      "max_seqs": null,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "058df67",
+      "date": "2026-11-05",
+      "flags": "q8 KV cache"
+    },
+    {
+      "id": "rel-llama-q27-3cards",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree llama-q27-3cards-n1 point"
+        },
+        {
+          "stage": "release-tree",
+          "contains": "release-tree llama-q27-3cards-n2 point"
+        }
+      ],
+      "older": "llama-q27-3cards",
+      "model": "Qwen3.8-27B",
+      "checkpoint": "unsloth Qwen3.8-27B-Q4_0.gguf",
+      "weights": "GGUF Q4_0, 14.94 GiB",
+      "engine": "llama.cpp",
+      "cards": 3,
+      "tp": null,
+      "pp": null,
+      "mtp": false,
+      "window": 126976,
+      "kv": "q4_0",
+      "util": null,
+      "max_seqs": null,
+      "kv_capacity": 888832,
+      "kv_capacity_source": "7 slots x 126976 tokens, measured capacity",
+      "tree": "058df67",
+      "date": "2026-11-05",
+      "flags": "-sm layer, q4_0 KV (-fa on), -b 2048 -ub 512, pipeline mode, -np N, slot 126976"
+    },
+    {
+      "id": "rel-pp3-q27",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree pp3-q27 point=L32768"
+        },
+        {
+          "stage": "release-tree",
+          "contains": "release-tree pp3-q27 point=L125000"
+        }
+      ],
+      "older": "pp3-q27",
+      "model": "Qwen3.8-27B",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "weights": "W4A16 AWQ g128, 14.5 GiB",
+      "engine": "fork, pipeline parallel 3",
+      "cards": 3,
+      "tp": 1,
+      "pp": 3,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "pipeline parallelism on 3 cards, host transfer between stages"
+    },
+    {
+      "id": "ab-q27-1-on",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab1-on point"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "weights": "W4A16 AWQ g128, 14.5 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "VLLM_ROCM_W4A8=256 VLLM_ROCM_W4A8_TILE=8 VLLM_ROCM_LMHEAD_INT8=1 VLLM_ROCM_EMBED_UVA=1 VLLM_ROCM_INT4_DECODE_QLEN_MAX=1 VLLM_ROCM_HOST_ALL_REDUCE=1"
+    },
+    {
+      "id": "ab-q27-1-off",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab1-off point"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "weights": "W4A16 AWQ g128, 14.5 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "VLLM_ROCM_W4A8=256 VLLM_ROCM_W4A8_TILE=8 VLLM_ROCM_LMHEAD_INT8=1 VLLM_ROCM_EMBED_UVA=1 VLLM_ROCM_INT4_DECODE_QLEN_MAX=1 VLLM_ROCM_HOST_ALL_REDUCE=0"
+    },
+    {
+      "id": "ab-q27-2-on",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab2-on point"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "weights": "W4A16 AWQ g128, 14.5 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "VLLM_ROCM_W4A8=256 VLLM_ROCM_W4A8_TILE=8 VLLM_ROCM_LMHEAD_INT8=1 VLLM_ROCM_EMBED_UVA=1 VLLM_ROCM_INT4_DECODE_QLEN_MAX=1 VLLM_ROCM_HOST_ALL_REDUCE=1"
+    },
+    {
+      "id": "ab-q27-2-off",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab2-off point"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "weights": "W4A16 AWQ g128, 14.5 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "VLLM_ROCM_W4A8=256 VLLM_ROCM_W4A8_TILE=8 VLLM_ROCM_LMHEAD_INT8=1 VLLM_ROCM_EMBED_UVA=1 VLLM_ROCM_INT4_DECODE_QLEN_MAX=1 VLLM_ROCM_HOST_ALL_REDUCE=0"
+    },
+    {
+      "id": "ab-q27-3-on",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab3-on point"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "weights": "W4A16 AWQ g128, 14.5 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "VLLM_ROCM_W4A8=256 VLLM_ROCM_W4A8_TILE=8 VLLM_ROCM_LMHEAD_INT8=1 VLLM_ROCM_EMBED_UVA=1 VLLM_ROCM_INT4_DECODE_QLEN_MAX=1 VLLM_ROCM_HOST_ALL_REDUCE=1"
+    },
+    {
+      "id": "ab-q27-3-off",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab3-off point"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "checkpoint": "philbert440/Qwen3.8-27B-W4A16-AWQ",
+      "weights": "W4A16 AWQ g128, 14.5 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "VLLM_ROCM_W4A8=256 VLLM_ROCM_W4A8_TILE=8 VLLM_ROCM_LMHEAD_INT8=1 VLLM_ROCM_EMBED_UVA=1 VLLM_ROCM_INT4_DECODE_QLEN_MAX=1 VLLM_ROCM_HOST_ALL_REDUCE=0"
+    },
+    {
+      "id": "ab-q9-on",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab-q9-on point"
+        }
+      ],
+      "model": "Qwen3.5-9B",
+      "checkpoint": "atalsharma/Qwen3.5-9B-AWQ",
+      "weights": "W4A16 AWQ g128, 7.14 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "as rel-q9, VLLM_ROCM_HOST_ALL_REDUCE=1",
+      "alt_points": {
+        "32768": 8192
+      }
+    },
+    {
+      "id": "ab-q9-off",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab-q9-off point"
+        }
+      ],
+      "model": "Qwen3.5-9B",
+      "checkpoint": "atalsharma/Qwen3.5-9B-AWQ",
+      "weights": "W4A16 AWQ g128, 7.14 GiB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.92",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "as rel-q9, VLLM_ROCM_HOST_ALL_REDUCE=0",
+      "alt_points": {
+        "32768": 8192
+      }
+    },
+    {
+      "id": "ab-q36-on",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab-q36-on point"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted by scripts/awq-to-ct.py",
+      "weights": "MoE CT-INT4 + W8A16, 24 GB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "as rel-q36, VLLM_ROCM_HOST_ALL_REDUCE=1"
+    },
+    {
+      "id": "ab-q36-off",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree ab-q36-off point"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted by scripts/awq-to-ct.py",
+      "weights": "MoE CT-INT4 + W8A16, 24 GB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": false,
+      "window": 131072,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "as rel-q36, VLLM_ROCM_HOST_ALL_REDUCE=0"
+    },
+    {
+      "id": "rep-q36-mtp-262k-2",
+      "match": [
+        {
+          "stage": "release-tree",
+          "contains": "release-tree q36-mtp-262k-r2 point"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "checkpoint": "cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted by scripts/awq-to-ct.py",
+      "weights": "MoE CT-INT4 + W8A16, 24 GB",
+      "engine": "fork",
+      "cards": 2,
+      "tp": 2,
+      "pp": 1,
+      "mtp": true,
+      "window": 262144,
+      "kv": "int4",
+      "util": "0.97",
+      "max_seqs": 8,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "0.1.0 (vLLM tree ac6a7c2b83)",
+      "date": "2026-11-05",
+      "flags": "as q36-mtp"
+    }
+  ]
+}

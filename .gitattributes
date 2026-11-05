@@ -1,0 +1,6 @@
+# Keep everything LF on every platform: shell scripts break with CRLF.
+* text=auto eol=lf
+# The patch must stay byte-exact; it reproduces the source tree bit for bit.
+*.patch -text
+*.png binary
+*.jpg binary
