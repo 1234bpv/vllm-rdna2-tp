@@ -1122,6 +1122,58 @@
       "flags": "VLLM_ROCM_MOE_RDNA2=1 VLLM_ROCM_INT4_PREFILL_KERNEL=hip"
     },
     {
+      "id": "q4-llama-q36",
+      "match": [
+        {
+          "stage": "q4-rerun",
+          "contains": "q4-rerun llama-q36q4 point"
+        }
+      ],
+      "model": "Qwen3.6-35B-A3B",
+      "checkpoint": "AesSedai Q4_K_M GGUF",
+      "weights": "GGUF Q4_K_M",
+      "engine": "llama.cpp",
+      "cards": 2,
+      "tp": null,
+      "pp": null,
+      "mtp": false,
+      "window": 262144,
+      "kv": "q8",
+      "util": null,
+      "max_seqs": null,
+      "kv_capacity": null,
+      "kv_capacity_source": null,
+      "tree": "058df67",
+      "date": "2026-11-05",
+      "flags": "q8 KV cache"
+    },
+    {
+      "id": "q4-llama-q27-2cards",
+      "match": [
+        {
+          "stage": "q4-rerun",
+          "contains": "q4-rerun llama-q27-2cards point"
+        }
+      ],
+      "model": "Qwen3.8-27B",
+      "checkpoint": "unsloth Qwen3.8-27B-Q4_0.gguf",
+      "weights": "GGUF Q4_0, 14.94 GiB",
+      "engine": "llama.cpp",
+      "cards": 2,
+      "tp": null,
+      "pp": null,
+      "mtp": false,
+      "window": 126976,
+      "kv": "q4_0",
+      "util": null,
+      "max_seqs": null,
+      "kv_capacity": null,
+      "kv_capacity_source": "not measured on two cards; 2 slots of 126976 tokens started",
+      "tree": "058df67",
+      "date": "2026-11-05",
+      "flags": "-sm layer, q4_0 KV (-fa on), pipeline mode, -np N, slot 126976"
+    },
+    {
       "id": "rel-llama-q36",
       "match": [
         {

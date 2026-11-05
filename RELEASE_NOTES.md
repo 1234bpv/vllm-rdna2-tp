@@ -12,7 +12,8 @@ Reference machine: RX 6800 + RX 6800 XT, 16 GB each, GPU clock limited to 1600 M
 | One exchange between the cards, decode size, microbenchmark in a loop | 17 µs, against about 164 µs through RCCL |
 | Decode with this all-reduce against RCCL, direct A/B | about +7 % (6.6–7.9 %) with one stream on Qwen3.8-27B and Qwen3.5-9B; no measurable gain with several streams or on Qwen3.6-35B-A3B |
 | Qwen3.6-35B-A3B, prompt of 125,000 tokens, TP=2 | prompt processing 1,289 tokens/s, decode 58.8 tokens/s |
-| The same point in llama.cpp on the same cards, Q5_K_M | 804 tokens/s, 19.9 tokens/s (the weights differ) |
+| The same point in llama.cpp on the same cards, Q4_K_M | 839 tokens/s, 20.4 tokens/s |
+| Qwen3.8-27B in llama.cpp on the same two cards, Q4_0, prompt of 125,000 tokens | 317 tokens/s, 7.1 tokens/s |
 | Qwen3.8-27B, window 262,144, prompt of 125,000 tokens | 283 tokens/s, 34.6 tokens/s |
 
 A faster exchange does not multiply the speed, and most of the gain against llama.cpp comes from the kernels. The full tables, with the configuration of each row and the cautions on MTP, are in [docs/PERFORMANCE.md](docs/PERFORMANCE.md).

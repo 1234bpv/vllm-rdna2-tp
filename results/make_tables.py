@@ -203,7 +203,7 @@ SUMMARY_ROWS = ["rel-q27", "rel-q27-mtp", "rel-q9", "rel-q9-mtp", "rel-q35", "re
                 "rel-q36-mtp-262k", "rel-gemma"]
 # The summary rows, the release runs of the other engines and the pipeline, then the older runs that
 # the release runs refer to or that are shown on their own.
-CONFIG_ROWS = SUMMARY_ROWS + ["rel-llama-q36", "rel-llama-q27-3cards", "rel-pp3-q27", "pp3-gemma",
+CONFIG_ROWS = SUMMARY_ROWS + ["q4-llama-q36", "q4-llama-q27-2cards", "rel-llama-q36", "rel-llama-q27-3cards", "rel-pp3-q27", "pp3-gemma",
                               "q27", "q27-mtp", "q9", "q9-mtp", "q35", "q35-mtp", "q35-offload", "q36",
                               "q36-mtp-262k", "q36-mtp-262k-kv8", "gemma", "gemma-streams", "llama-q36",
                               "llama-q27-3cards", "pp3-q27"]
@@ -337,6 +337,20 @@ def comparison(runs, fork_id, other_id, points):
             ratio(get(fork, length, streams, "tg"), get(other, length, streams, "tg")),
         ])
     return rows
+
+
+def t_vs_llamacpp_q4(runs):
+    header = ["Prompt × streams", "Fork PP", "Fork TG", "Fork TTFT, s",
+              "llama.cpp PP", "llama.cpp TG", "llama.cpp TTFT, s", "PP ratio", "TG ratio"]
+    points = [(300, 1), (300, 4), (32768, 1), (32768, 2), (125000, 1), (125000, 2)]
+    return table(header, comparison(runs, "rel-q36", "q4-llama-q36", points))
+
+
+def t_vs_llamacpp_q27_2cards(runs):
+    header = ["Prompt × streams", "Fork PP", "Fork TG", "Fork TTFT, s",
+              "llama.cpp PP", "llama.cpp TG", "llama.cpp TTFT, s", "PP ratio", "TG ratio"]
+    points = [(300, 1), (32768, 1), (32768, 2), (125000, 1)]
+    return table(header, comparison(runs, "rel-q27", "q4-llama-q27-2cards", points))
 
 
 def t_vs_llamacpp(runs):
@@ -567,6 +581,8 @@ TABLES = {
     "matrix-q35": lambda runs, ar: t_matrix_q35(runs),
     "matrix-q36": lambda runs, ar: t_matrix_q36(runs),
     "matrix-gemma": lambda runs, ar: t_matrix_gemma(runs),
+    "vs-llamacpp-q4": lambda runs, ar: t_vs_llamacpp_q4(runs),
+    "vs-llamacpp-q27-2cards": lambda runs, ar: t_vs_llamacpp_q27_2cards(runs),
     "vs-llamacpp": lambda runs, ar: t_vs_llamacpp(runs),
     "vs-llamacpp-q27": lambda runs, ar: t_vs_llamacpp_q27(runs),
     "vs-pp3": lambda runs, ar: t_vs_pp3(runs),

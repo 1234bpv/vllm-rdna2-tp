@@ -127,7 +127,7 @@ A model outside this list is untested: start from the closest preset and expect 
 
 **Streams.** More streams raise the total throughput and lower the speed of each. The measured points are in [the matrices](PERFORMANCE.md#full-matrices).
 
-**MTP.** The gain is largest for one stream on a long prompt. Numbers on random tokens are inflated. On a real agent workload with 4 clients, Qwen3.6-35B-A3B gained 5.6 % in wall time. Two things to know:
+**MTP.** The gain is largest for one stream on a long prompt and falls with the number of streams. On a real agent workload with 4 clients, Qwen3.6-35B-A3B gained 5.6 % in wall time; one stream on a real workload was not measured. Two things to know:
 
 - with MTP on, `min_p` and `logit_bias` in a request are refused (KI-17);
 - a client abort during prefill can hang the workers (KI-9).

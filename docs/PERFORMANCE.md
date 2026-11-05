@@ -30,11 +30,11 @@ effect of each kernel and of scaling compare runs of one earlier day, and their 
 
 ## Reading these numbers
 
-1. **MTP numbers are inflated on random tokens.** Random prompts make the model fall into repetition, and most drafts are accepted (0.90–0.97
-   at 300 tokens on Qwen3.5-9B).
-   Compare MTP numbers only within one table. On a real workload (agent task set, 18 tasks, 4 clients, Qwen3.6-35B-A3B) MTP
-   reduced the wall time by 5.6 %, from 189.8 to 179.1 s, with 73–77 % of the drafts accepted
-   (`docs/notes/measurements/2026-10-07-qwen36-config-results.md`).
+1. **The gain of MTP falls with the number of streams.** On Qwen3.8-27B at 32k it is 1.8× with one stream, 1.6× with two and 1.1× with four.
+   On a real workload (agent task set, 18 tasks, 4 clients, Qwen3.6-35B-A3B) MTP reduced the wall time by 5.6 %, from 189.8
+   to 179.1 s, with 73–77 % of the drafts accepted (`docs/notes/measurements/2026-10-07-qwen36-config-results.md`).
+   On the random prompts of these tables 0.90–0.97 of the drafts are accepted at 300 tokens on Qwen3.5-9B. One stream on a real
+   workload was not measured.
 2. **Measurement error.** See [Repeats](#repeats). Without MTP, decode repeats within 3.8 %, and PP on long prompts within 5.1 %, so
    differences below about 5 % are noise. With MTP, two starts of the release tree differ in TG by up to 24.7 % at one point.
 3. **PP of 300-token prompts with several streams is not shown** in the matrices: it reflects warm-up and repeats differ by up
@@ -215,10 +215,26 @@ The PP of 211 at 300 × 1 is the first point after the start (TTFT 1.4 s), so it
 
 ## Against llama.cpp
 
-### Qwen3.6-35B-A3B on the same two cards
+### Qwen3.6-35B-A3B on the same two cards, Q4_K_M
 
-Fork: TP=2, CT-INT4 + W8A16, int4 KV cache, no MTP, window 131,072. llama.cpp `058df67`: Q5_K_M, q8 KV cache, no MTP, window 262,144.
-Same probe, same day, 5 Nov 2026.
+Fork: TP=2, CT-INT4 + W8A16, int4 KV cache, no MTP, window 131,072. llama.cpp `058df67`: Q4_K_M from AesSedai, q8 KV cache, no MTP,
+window 262,144. Same probe, same day, 5 Nov 2026. The first attempt at 32k × 1 lost its usage record, so the table shows the later of two repeats.
+The quality of this Q4_K_M was not measured.
+
+<!-- table:vs-llamacpp-q4 -->
+| Prompt × streams | Fork PP | Fork TG | Fork TTFT, s | llama.cpp PP | llama.cpp TG | llama.cpp TTFT, s | PP ratio | TG ratio |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 300 × 1 | — | 66.1 | 0.3 | — | 59.5 | 1.0 | — | ×1.11 |
+| 300 × 4 | — | 206.3 | 0.8 | — | 144.7 | 1.2 | — | ×1.43 |
+| 32k × 1 | 2094 | 64.2 | 16 | 1341 | 38.2 | 24 | ×1.56 | ×1.68 |
+| 32k × 2 | 2167 | 113.7 | 30 | 987 | 60.8 | 66 | ×2.20 | ×1.87 |
+| 125k × 1 | 1289 | 58.8 | 97 | 839 | 20.4 | 149 | ×1.54 | ×2.88 |
+| 125k × 2 | 1348 | 99.8 | 185 | 456 | 28.4 | 548 | ×2.96 | ×3.52 |
+<!-- /table:vs-llamacpp-q4 -->
+
+### Qwen3.6-35B-A3B on the same two cards, Q5_K_M
+
+The same flags with Q5_K_M: within 5 % of Q4_K_M in PP and within 10 % in TG.
 
 <!-- table:vs-llamacpp -->
 | Prompt × streams | Fork PP | Fork TG | Fork TTFT, s | llama.cpp PP | llama.cpp TG | llama.cpp TTFT, s | PP ratio | TG ratio |
@@ -240,6 +256,20 @@ Conditions that favor one side or the other:
   either side. The 131,072 repeat was cancelled. An older record of Qwen3.8-27B in llama.cpp below shows what MTP gave there.
 - **PP of 300-token prompts is not compared:** it reflects warm-up.
 - **The first requests to llama.cpp are slower.** At 300 × 1 the first two requests after its start gave a TG of 48.1 and 51.3, and the table shows the third, 58.9.
+
+### Qwen3.8-27B on the same two cards
+
+Fork: TP=2, int4 KV cache, no MTP. llama.cpp: layer split on two cards, Q4_0 from unsloth, q4_0 KV cache, no MTP, 126,976 tokens per slot.
+Same probe, 5 Nov 2026. llama.cpp has the higher PP at 125,000 tokens; the fork has the higher TG at every point.
+
+<!-- table:vs-llamacpp-q27-2cards -->
+| Prompt × streams | Fork PP | Fork TG | Fork TTFT, s | llama.cpp PP | llama.cpp TG | llama.cpp TTFT, s | PP ratio | TG ratio |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 300 × 1 | — | 38.0 | 0.5 | — | 22.4 | 1.6 | — | ×1.70 |
+| 32k × 1 | 555 | 36.7 | 59 | 484 | 14.5 | 68 | ×1.15 | ×2.53 |
+| 32k × 2 | 572 * | 65.0 * | 115 * | 446 | 19.9 | 147 | ×1.28 | ×3.26 |
+| 125k × 1 | 283 | 34.6 | 441 | 317 | 7.1 | 394 | ×0.89 | ×4.88 |
+<!-- /table:vs-llamacpp-q27-2cards -->
 
 ### Qwen3.8-27B: two cards against three
 
@@ -418,6 +448,8 @@ that point is not shown in the matrices.
 | `q36-mtp` | Qwen3.6-35B-A3B | cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted by scripts/awq-to-ct.py | MoE CT-INT4 + W8A16, 24 GB | fork | 2 | 131,072 | int4 | 0.97 | 4 | 2439264a0b | 2026-10-06 |
 | `rel-q36-mtp-262k` | Qwen3.6-35B-A3B | cyankiwi/Qwen3.6-35B-A3B-AWQ-4bit, converted by scripts/awq-to-ct.py | MoE CT-INT4 + W8A16, 24 GB | fork | 2 | 262,144 | int4 | 0.97 | 8 | 0.1.0 (vLLM tree ac6a7c2b83) | 2026-11-05 |
 | `rel-gemma` | Gemma 4 26B-A4B | cyankiwi/gemma-4-26B-A4B-it-qat-AWQ-INT4 | MoE AWQ INT4 g32, 17.2 GB | fork | 2 | 262,144 | int4 | 0.97 | 16 | 0.1.0 (vLLM tree ac6a7c2b83) | 2026-11-05 |
+| `q4-llama-q36` | Qwen3.6-35B-A3B | AesSedai Q4_K_M GGUF | GGUF Q4_K_M | llama.cpp | 2 | 262,144 | q8 | — | — | 058df67 | 2026-11-05 |
+| `q4-llama-q27-2cards` | Qwen3.8-27B | unsloth Qwen3.8-27B-Q4_0.gguf | GGUF Q4_0, 14.94 GiB | llama.cpp | 2 | 126,976 | q4_0 | — | — | 058df67 | 2026-11-05 |
 | `rel-llama-q36` | Qwen3.6-35B-A3B | AesSedai Q5_K_M GGUF | GGUF Q5_K_M | llama.cpp | 2 | 262,144 | q8 | — | — | 058df67 | 2026-11-05 |
 | `rel-llama-q27-3cards` | Qwen3.8-27B | unsloth Qwen3.8-27B-Q4_0.gguf | GGUF Q4_0, 14.94 GiB | llama.cpp | 3 | 126,976 | q4_0 | — | — | 058df67 | 2026-11-05 |
 | `rel-pp3-q27` | Qwen3.8-27B | philbert440/Qwen3.8-27B-W4A16-AWQ | W4A16 AWQ g128, 14.5 GiB | fork, pipeline parallel 3 | 3 | 262,144 | int4 | 0.97 | 8 | 0.1.0 (vLLM tree ac6a7c2b83) | 2026-11-05 |
@@ -470,6 +502,8 @@ MTP adds `--speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens"
 | `q36-mtp` | as q36, VLLM_ROCM_INT4_DECODE_QLEN_MAX=3, MTP 2 drafts, capture sizes up to 24 |
 | `rel-q36-mtp-262k` | as q36-mtp |
 | `rel-gemma` | VLLM_ROCM_MOE_RDNA2=1 VLLM_ROCM_INT4_PREFILL_KERNEL=hip |
+| `q4-llama-q36` | q8 KV cache |
+| `q4-llama-q27-2cards` | -sm layer, q4_0 KV (-fa on), pipeline mode, -np N, slot 126976 |
 | `rel-llama-q36` | q8 KV cache |
 | `rel-llama-q27-3cards` | -sm layer, q4_0 KV (-fa on), -b 2048 -ub 512, pipeline mode, -np N, slot 126976 |
 | `rel-pp3-q27` | pipeline parallelism on 3 cards, host transfer between stages |
@@ -496,9 +530,9 @@ MTP adds `--speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens"
 Earlier records of Qwen3.8-27B from 28 Sep 2026 (commit `e7e3cfe81a`) are in `docs/notes/measurements/2026-09-28-mtp-attention-results.md`. This document uses the
 records of the release tree. The later commits run the HIP attention kernel under MTP (`VLLM_ROCM_INT4_DECODE_QLEN_MAX=3`) and add kernels
 for small batches, so TG at 125k × 1 is 31.0 in the earlier records and 34.6 here, and with MTP 34.4 and 63.5. TG with MTP at 300 × 1 is
-68.6 in those records, 54.7 on 1 Oct 2026 and 73.0 here, which falls under the caution about MTP on random tokens.
+68.6 in those records, 54.7 on 1 Oct 2026 and 73.0 here, which falls under the spread of repeats with MTP.
 
-The comparison with llama.cpp on three cards in the talk of 5 Nov 2026 uses the same-day records of 23 Sep 2026, where pipeline parallelism gives a TG of 10.5 at
+The comparison with llama.cpp on three cards in the records of 23 Sep 2026 has a TG of 10.5 for pipeline parallelism at
 125k × 1. The table above has the record of the release tree, 15.2.
 
 ## Reproducing
@@ -519,11 +553,12 @@ that every table in this file matches the records.
 llama.cpp `058df67`, all layers on the GPUs. These commands were run on 5 Nov 2026 for the tables above.
 
 ```bash
-# Qwen3.6-35B-A3B, Q5_K_M from AesSedai, two cards
+# Qwen3.6-35B-A3B, Q4_K_M or Q5_K_M from AesSedai, two cards
 HIP_VISIBLE_DEVICES=0,1 llama-server -m <Q5_K_M.gguf> --alias q36 --host 127.0.0.1 --port 8204 -c 262144 -np 4 --kv-unified \
   -ngl 99 -fa on -ctk q8_0 -ctv q8_0 -b 2048 -ub 512 --jinja --metrics --reasoning-format deepseek
 
-# Qwen3.8-27B, Q4_0 from unsloth, three cards. N is the number of streams, with one start per point
+# Qwen3.8-27B, Q4_0 from unsloth, three cards. N is the number of streams, with one start per point.
+# For two cards, set HIP_VISIBLE_DEVICES=0,1
 HIP_VISIBLE_DEVICES=0,1,2 llama-server --model <Q4_0.gguf> --n-gpu-layers 99 --split-mode layer --flash-attn on \
   --cache-type-k q4_0 --cache-type-v q4_0 --parallel N --ctx-size $((N * 126976)) --fit off \
   --metrics --host 127.0.0.1 --port 8101

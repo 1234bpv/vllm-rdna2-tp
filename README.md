@@ -8,10 +8,11 @@ do not need P2P access to each other. Nothing was measured at stock clocks.
 
 | What was measured | Result |
 |---|---|
-| Qwen3.8-27B + MTP, window 262,144 on 2 × 16 GB, prompts of 32,768 and 125,000 tokens (random tokens, see the cautions below) | decode **66.0** and **63.5 tokens/s**, prompt processing 533 and 271 tokens/s |
+| Qwen3.8-27B + MTP, window 262,144 on 2 × 16 GB, prompts of 32,768 and 125,000 random tokens | decode **66.0** and **63.5 tokens/s**, prompt processing 533 and 271 tokens/s |
 | The same without MTP, prompt of 125,000 tokens | 34.6 tokens/s, prompt processing 283 tokens/s |
 | Qwen3.6-35B-A3B, prompt of 125,000 tokens, window 131,072 | decode **58.8 tokens/s**, prompt processing **1,289 tokens/s** |
-| The same point in llama.cpp on the same two cards (Q5_K_M) | 19.9 tokens/s, 804 tokens/s (quantization differs, see [quality](docs/PERFORMANCE.md#quality)) |
+| The same point in llama.cpp on the same two cards, Q4_K_M | 20.4 tokens/s, 839 tokens/s |
+| Qwen3.8-27B in llama.cpp on the same two cards, Q4_0, prompt of 125,000 tokens | 7.1 tokens/s, 317 tokens/s: higher prompt processing than this fork, a fifth of its decode |
 | Decode with this all-reduce against RCCL, direct A/B | about **+7 %** (6.6–7.9 %) with one stream on Qwen3.8-27B and Qwen3.5-9B; no measurable gain with several streams or on Qwen3.6-35B-A3B |
 | One exchange between the cards, decode size (5,120 fp16 elements), microbenchmark in a loop | **17 µs**, against about 164 µs through RCCL. This ×9.6 does not carry over to a decode step |
 
@@ -122,8 +123,9 @@ release tree.
 
 Read these numbers with four cautions:
 
-1. **MTP is inflated on random tokens.** Compare MTP numbers only within these tables. On a real agent workload with
-   4 clients, MTP reduced the wall time of Qwen3.6-35B-A3B by 5.6 % (189.8 to 179.1 s).
+1. **The gain of MTP falls with the number of streams.** On Qwen3.8-27B at 32k it is 1.8× with one stream, 1.6× with two and 1.1× with four.
+   On a real agent workload with 4 clients, MTP reduced the wall time of Qwen3.6-35B-A3B by 5.6 % (189.8 to 179.1 s).
+   One stream on a real workload was not measured.
 2. **Repeats without MTP.** TG repeats within 0–3.8 % and PP on long prompts within 0–5.1 %. Do not interpret smaller
    differences. PP of short prompts depends on warm-up: it is not shown with several streams, where repeats differ by up to
    75 %, and the 211 of Gemma 4 is the first point after a start.
@@ -136,21 +138,21 @@ See [the configuration of each row](docs/PERFORMANCE.md#configuration-of-each-ru
 
 ### Against llama.cpp, same two cards
 
-Qwen3.6-35B-A3B, TP=2, no MTP, 4-bit expert weights and int4 KV cache, against llama.cpp 058df67 with Q5_K_M and a q8 KV
-cache, no MTP. **The weights differ.** The GGUF file is closer to the reference quantization (KLD 0.0090 against 0.0271 for
-this fork, [details](docs/PERFORMANCE.md#quality)), so this compares two practical setups and not two engines on equal
-terms.
+Qwen3.6-35B-A3B, TP=2, no MTP, 4-bit expert weights and int4 KV cache, against llama.cpp 058df67 with Q4_K_M and a q8 KV
+cache, no MTP. Both use 4-bit weights, in different formats. The quality of this Q4_K_M was not measured. Q5_K_M runs within
+5 % in PP and 10 % in TG of it, and the [details](docs/PERFORMANCE.md#against-llamacpp) include Qwen3.8-27B, where llama.cpp
+has the higher PP at 125,000 tokens.
 
-<!-- table:vs-llamacpp -->
+<!-- table:vs-llamacpp-q4 -->
 | Prompt × streams | Fork PP | Fork TG | Fork TTFT, s | llama.cpp PP | llama.cpp TG | llama.cpp TTFT, s | PP ratio | TG ratio |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 300 × 1 | — | 66.1 | 0.3 | — | 58.9 | 0.6 | — | ×1.12 |
-| 300 × 4 | — | 206.3 | 0.8 | — | 132.2 | 1.3 | — | ×1.56 |
-| 32k × 1 | 2094 | 64.2 | 16 | 1317 | 36.3 | 25 | ×1.59 | ×1.77 |
-| 32k × 2 | 2167 | 113.7 | 30 | 946 | 60.5 | 69 | ×2.29 | ×1.88 |
-| 125k × 1 | 1289 | 58.8 | 97 | 804 | 19.9 | 156 | ×1.60 | ×2.95 |
-| 125k × 2 | 1348 | 99.8 | 185 | 463 | 27.3 | 540 | ×2.91 | ×3.65 |
-<!-- /table:vs-llamacpp -->
+| 300 × 1 | — | 66.1 | 0.3 | — | 59.5 | 1.0 | — | ×1.11 |
+| 300 × 4 | — | 206.3 | 0.8 | — | 144.7 | 1.2 | — | ×1.43 |
+| 32k × 1 | 2094 | 64.2 | 16 | 1341 | 38.2 | 24 | ×1.56 | ×1.68 |
+| 32k × 2 | 2167 | 113.7 | 30 | 987 | 60.8 | 66 | ×2.20 | ×1.87 |
+| 125k × 1 | 1289 | 58.8 | 97 | 839 | 20.4 | 149 | ×1.54 | ×2.88 |
+| 125k × 2 | 1348 | 99.8 | 185 | 456 | 28.4 | 548 | ×2.96 | ×3.52 |
+<!-- /table:vs-llamacpp-q4 -->
 
 ### Against pipeline parallelism on three cards
 
